@@ -1,0 +1,13 @@
+{
+  "domain": "karlstad_avc",
+  "name": "Karlstad Återvinningscentraler",
+  "version": "0.1.0",
+  "documentation": "https://karlstadsenergi.se/atervinning/atervinningscentraler",
+  "requirements": ["beautifulsoup4", "requests"],
+  "dependencies": [],
+  "codeowners": ["@your-github-username"],
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "config_flow": true,
+  "supported_platforms": ["sensor"]
+} 

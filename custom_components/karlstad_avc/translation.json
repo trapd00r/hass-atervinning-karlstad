@@ -1,0 +1,10 @@
+{
+  "title": "Karlstad Återvinningscentraler",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Setup Karlstad ÅVC integration"
+      }
+    }
+  }
+} 
