@@ -26,10 +26,13 @@ CENTERS = [
 ]
 
 def extract_center_name(header_text):
-    match = re.match(r"([A-Za-zåäöÅÄÖ\s()]+?)(Stängt|Öppet|\(|$)", header_text)
+    # Remove 'ÅVC ' prefix if present
+    header_text = header_text.replace("ÅVC ", "")
+    # Split on first digit or 'Stängt' or 'Öppet'
+    match = re.match(r"([A-Za-zåäöÅÄÖ\s()]+?)(Stängt|Öppet|\d|$)", header_text)
     if match:
-        return match.group(1).replace("ÅVC ", "").strip()
-    return header_text.replace("ÅVC ", "").strip()
+        return match.group(1).strip()
+    return header_text.strip()
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     # Not used in new integrations
@@ -51,9 +54,13 @@ class KarlstadAVCCoordinator(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self):
-        return await self.hass.async_add_executor_job(fetch_opening_hours)
+        _LOGGER.info("Coordinator: updating data...")
+        data = await self.hass.async_add_executor_job(fetch_opening_hours)
+        _LOGGER.info(f"Coordinator: data received: {data}")
+        return data
 
 def fetch_opening_hours():
+    _LOGGER.info("Fetching opening hours from website...")
     resp = requests.get(URL)
     soup = BeautifulSoup(resp.text, "html.parser")
     data = {}
@@ -78,6 +85,7 @@ def fetch_opening_hours():
                         tomorrow = tomorrow_value
                     break
         data[center_name] = {"today": today, "tomorrow": tomorrow}
+    _LOGGER.info(f"Fetched data: {data}")
     return data
 
 class KarlstadAVCSensor(CoordinatorEntity, SensorEntity):

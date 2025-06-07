@@ -22,30 +22,27 @@ except locale.Error:
     pass  # fallback if not available
 
 def extract_center_name(header_text):
-    # Extract center name before first occurrence of 'Stängt' or 'Öppet' or '(' or whitespace + uppercase
-    match = re.match(r"([A-Za-zåäöÅÄÖ\s()]+?)(Stängt|Öppet|\(|$)", header_text)
+    # Remove 'ÅVC ' prefix if present
+    header_text = header_text.replace("ÅVC ", "")
+    # Split on first digit or 'Stängt' or 'Öppet'
+    match = re.match(r"([A-Za-zåäöÅÄÖ\s()]+?)(Stängt|Öppet|\d|$)", header_text)
     if match:
-        return match.group(1).replace("ÅVC ", "").strip()
-    return header_text.replace("ÅVC ", "").strip()
+        return match.group(1).strip()
+    return header_text.strip()
 
 def fetch_opening_hours():
     resp = requests.get(URL)
     soup = BeautifulSoup(resp.text, "html.parser")
     data = {}
-    found_any = False
     for header in soup.find_all("div", class_="ke-open-hours__header"):
         raw_header = header.get_text(strip=True)
         center_name = extract_center_name(raw_header)
-        # print(f"Found header: {center_name}")
-        if center_name not in CENTERS:
-            continue
-        found_any = True
+        print(f"Found header: '{center_name}' (raw: '{raw_header}')")
         content = header.find_next_sibling("div", class_="ke-open-hours__content")
         today = None
         tomorrow = None
         if content:
             days = content.find_all("div", class_="ke-open-hours__day")
-            found_today = False
             for i, day in enumerate(days):
                 label = day.find("p").get_text(strip=True)
                 value = day.find_all("p")[1].get_text(strip=True)
@@ -57,9 +54,6 @@ def fetch_opening_hours():
                         tomorrow = tomorrow_value
                     break
         data[center_name] = {"today": today, "tomorrow": tomorrow}
-    if not found_any:
-        print("No headers found. Dumping a snippet of the HTML:")
-        print(soup.prettify()[:2000])
     return data
 
 def main():
