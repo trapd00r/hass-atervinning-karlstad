@@ -13,7 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 _LOGGER = logging.getLogger(__name__)
 
 URL = "https://karlstadsenergi.se/atervinning/atervinningscentraler"
-SCAN_INTERVAL = timedelta(hours=24)
+SCAN_INTERVAL = timedelta(hours=1)
 
 CENTERS = [
     "Djupdalen",
